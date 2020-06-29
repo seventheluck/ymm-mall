@@ -10,7 +10,7 @@ public interface LocalProductDao {
 
     LocalProduct get(Long id);
 
-    List<LocalProduct> getByShopifyIdAndVariantId(String shopifyId, String variantId);
+    LocalProduct getByShopifyIdAndVariantId(String shopifyId, String variantId);
 
     List<LocalProduct> getByStatus(String status);
     

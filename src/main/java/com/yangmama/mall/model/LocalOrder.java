@@ -41,6 +41,7 @@ public class LocalOrder {
     private String country;
     private String zipCode;
     private String status;
+    private String sysNote;
     @OneToMany(mappedBy = "localOrder")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

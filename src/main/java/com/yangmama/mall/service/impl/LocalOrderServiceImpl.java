@@ -2,10 +2,13 @@ package com.yangmama.mall.service.impl;
 
 import com.google.common.base.Strings;
 import com.yangmama.mall.dao.LocalOrderDao;
+import com.yangmama.mall.dao.LocalOrderSummaryDao;
 import com.yangmama.mall.dao.LocalProductDao;
 import com.yangmama.mall.dao.LocalOrderLocalProductDao;
+import com.yangmama.mall.dao.impl.LocalOrderSummaryDaoImpl;
 import com.yangmama.mall.model.LocalOrder;
 import com.yangmama.mall.model.LocalOrderLocalProduct;
+import com.yangmama.mall.model.LocalOrderSummary;
 import com.yangmama.mall.model.LocalProduct;
 import com.yangmama.mall.pojo.orders.LineItem;
 import com.yangmama.mall.pojo.orders.Order;
@@ -36,6 +39,9 @@ public class LocalOrderServiceImpl implements LocalOrderService {
 
     @Autowired
     LocalOrderLocalProductDao localOrderLocalProductDao;
+
+    @Autowired
+    LocalOrderSummaryDao localOrderSummaryDao;
 
     @Autowired
     OrderProcessor orderProcessor;
@@ -92,16 +98,26 @@ public class LocalOrderServiceImpl implements LocalOrderService {
                 continue;
             }
             for (LineItem lineItem : order.getLineItems()) {
-                List<LocalProduct> localProduct = localProductDao.getByShopifyIdAndVariantId(String.valueOf(lineItem.getProductId()), String.valueOf(lineItem.getVariantId()));
+                LocalProduct localProduct = localProductDao.getByShopifyIdAndVariantId(String.valueOf(lineItem.getProductId()), String.valueOf(lineItem.getVariantId()));
                 LocalOrderLocalProduct relation = LocalOrderLocalProduct.builder()
                         .quantity(lineItem.getQuantity())
                         .status("open")
                         .price(new BigDecimal(lineItem.getPrice()))
-                        .localProduct(localProduct.get(0))
+                        .localProduct(localProduct)
                         .localOrder(localOrder)
                         .build();
                 localOrderLocalProductDao.save(relation);
                 localOrder.getLocalOrderLocalProducts().add(relation);
+                LocalOrderSummary localOrderSummary = localOrderSummaryDao.queryByProductIdAndShippingMethod(localProduct.getId(), localOrder.getShippingMethod());
+                if (localOrderSummary == null) {
+                    localOrderSummary = LocalOrderSummary.builder()
+                            .localProduct(localProduct)
+                            .quantity(0L)
+                            .shippingMethod(localOrder.getShippingMethod())
+                            .build();
+                }
+                localOrderSummary.setQuantity(localOrderSummary.getQuantity() + relation.getQuantity());
+                localOrderSummaryDao.save(localOrderSummary);
             }
             localOrderDao.save(localOrder);
 

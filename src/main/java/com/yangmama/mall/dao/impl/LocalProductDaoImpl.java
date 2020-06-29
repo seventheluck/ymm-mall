@@ -30,12 +30,12 @@ public class LocalProductDaoImpl implements LocalProductDao {
     }
 
     @Override
-    public List<LocalProduct> getByShopifyIdAndVariantId(String shopifyId, String variantId) {
+    public LocalProduct getByShopifyIdAndVariantId(String shopifyId, String variantId) {
         Session currentSession = entityManager.unwrap(Session.class);
         Query<LocalProduct> query = currentSession.createQuery("from LocalProduct l where l.shopifyId = :shopifyId and l.variantId = :variantId");
         query.setParameter("shopifyId", shopifyId);
         query.setParameter("variantId", variantId);
-        return query.getResultList();
+        return query.getSingleResult();
     }
 
     @Override
