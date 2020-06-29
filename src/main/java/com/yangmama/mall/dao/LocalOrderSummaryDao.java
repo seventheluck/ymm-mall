@@ -2,7 +2,7 @@ package com.yangmama.mall.dao;
 
 import com.yangmama.mall.model.LocalOrderSummary;
 
-public interface LocalOrderSummayDao {
+public interface LocalOrderSummaryDao {
 
     void save(LocalOrderSummary localOrderSummary);
 

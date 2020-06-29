@@ -1,6 +1,7 @@
 package com.yangmama.mall.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -16,6 +17,7 @@ import java.math.BigDecimal;
 )
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class LocalOrderSummary {
 
     @Id
@@ -25,6 +27,5 @@ public class LocalOrderSummary {
     @JoinColumn(name = "product_id")
     private LocalProduct localProduct;
     private String shippingMethod;
-    private Integer total;
-    private BigDecimal amount;
+    private Long quantity;
 }

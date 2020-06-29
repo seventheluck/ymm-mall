@@ -1,6 +1,6 @@
 package com.yangmama.mall.dao.impl;
 
-import com.yangmama.mall.dao.LocalOrderSummayDao;
+import com.yangmama.mall.dao.LocalOrderSummaryDao;
 import com.yangmama.mall.model.LocalOrderSummary;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 
 @Repository
-public class LocalOrderSummaryDaoImpl implements LocalOrderSummayDao {
+public class LocalOrderSummaryDaoImpl implements LocalOrderSummaryDao {
 
     @Autowired
     EntityManager entityManager;
