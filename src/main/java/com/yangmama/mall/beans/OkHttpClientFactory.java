@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class OkHttpClientFactory {
+
     @Bean
     public OkHttpClient getClientInstance() {
         return new OkHttpClient().newBuilder()
