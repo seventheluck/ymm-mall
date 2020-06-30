@@ -18,4 +18,6 @@ public interface LocalOrderService {
     void delete(Long id);
 
     void importLocalOrderList(OrderRequestParameter orderRequestParameter) throws Exception;
+
+    void syncProduct() throws IOException;
 }

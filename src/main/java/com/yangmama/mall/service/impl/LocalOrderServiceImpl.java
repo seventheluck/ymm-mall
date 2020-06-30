@@ -5,7 +5,6 @@ import com.yangmama.mall.dao.LocalOrderDao;
 import com.yangmama.mall.dao.LocalOrderSummaryDao;
 import com.yangmama.mall.dao.LocalProductDao;
 import com.yangmama.mall.dao.LocalOrderLocalProductDao;
-import com.yangmama.mall.dao.impl.LocalOrderSummaryDaoImpl;
 import com.yangmama.mall.model.LocalOrder;
 import com.yangmama.mall.model.LocalOrderLocalProduct;
 import com.yangmama.mall.model.LocalOrderSummary;
@@ -20,8 +19,10 @@ import com.yangmama.mall.service.LocalOrderService;
 import com.yangmama.mall.utils.ShopifyToLocalUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -48,6 +49,9 @@ public class LocalOrderServiceImpl implements LocalOrderService {
 
     @Autowired
     ProductProcessor productProcessor;
+
+    @Autowired
+    LocalOrderService localOrderService;
 
     @Transactional(rollbackFor = {Exception.class})
     @Override
@@ -77,20 +81,11 @@ public class LocalOrderServiceImpl implements LocalOrderService {
         localOrderDao.delete(id);
     }
 
-    @Transactional(rollbackFor = {Exception.class})
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = {Exception.class})
     @Override
     public void importLocalOrderList(OrderRequestParameter orderRequestParameter) throws Exception {
+        localOrderService.syncProduct();
         List<Order> orderList = orderProcessor.getList(orderRequestParameter);
-        List<Product> productList = productProcessor.getList();
-        for (Product product : productList) {
-            List<LocalProduct> localProductList = ShopifyToLocalUtil.shopifyProductToLocalProduct(product);
-            for (LocalProduct localProduct : localProductList) {
-                if (localProductDao.getByShopifyIdAndVariantId(localProduct.getShopifyId(), localProduct.getVariantId()) != null) {
-                    continue;
-                }
-                localProductDao.save(localProduct);
-            }
-        }
 
         for (Order order : orderList) {
             LocalOrder localOrder = ShopifyToLocalUtil.shopifyOrderToLocalOrder(order);
@@ -98,7 +93,11 @@ public class LocalOrderServiceImpl implements LocalOrderService {
                 continue;
             }
             for (LineItem lineItem : order.getLineItems()) {
+                if (lineItem.getProductId() == null) {
+                    continue;
+                }
                 LocalProduct localProduct = localProductDao.getByShopifyIdAndVariantId(String.valueOf(lineItem.getProductId()), String.valueOf(lineItem.getVariantId()));
+
                 LocalOrderLocalProduct relation = LocalOrderLocalProduct.builder()
                         .quantity(lineItem.getQuantity())
                         .status("open")
@@ -116,11 +115,29 @@ public class LocalOrderServiceImpl implements LocalOrderService {
                             .shippingMethod(localOrder.getShippingMethod())
                             .build();
                 }
-                localOrderSummary.setQuantity(localOrderSummary.getQuantity() + relation.getQuantity());
+                localOrderSummary.setQuantity(localOrderSummary.getQuantity() + lineItem.getQuantity());
                 localOrderSummaryDao.save(localOrderSummary);
             }
             localOrderDao.save(localOrder);
 
+        }
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = {Exception.class})
+    public void syncProduct() throws IOException {
+        List<Product> productList = productProcessor.getList();
+        for (Product product : productList) {
+            List<LocalProduct> localProductList = ShopifyToLocalUtil.shopifyProductToLocalProduct(product);
+            for (LocalProduct localProduct : localProductList) {
+                LocalProduct prevProduct = localProductDao.getByShopifyIdAndVariantId(localProduct.getShopifyId(), localProduct.getVariantId());
+                if (prevProduct != null) {
+                    prevProduct.setName(localProduct.getName());
+                    localProductDao.save(prevProduct);
+                } else {
+                    localProductDao.save(localProduct);
+                }
+            }
         }
     }
 }

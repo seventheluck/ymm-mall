@@ -2,16 +2,19 @@ package com.yangmama.mall.dao.impl;
 
 import com.yangmama.mall.dao.LocalOrderDao;
 import com.yangmama.mall.model.LocalOrder;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 
 import java.util.List;
 
 @Repository
+@Slf4j
 public class LocalOrderDaoImpl implements LocalOrderDao {
 
     @Autowired
@@ -51,11 +54,16 @@ public class LocalOrderDaoImpl implements LocalOrderDao {
     }
 
     @Override
-    public List<LocalOrder> getByDisplayid(String displayId) {
+    public LocalOrder getByDisplayid(String displayId) {
         Session currentSession = entityManager.unwrap(Session.class);
         Query<LocalOrder> query = currentSession.createQuery("from LocalOrder l where l.displayId = :displayId");
         query.setParameter("displayId", displayId);
-        return query.getResultList();
+        try {
+            return query.getSingleResult();
+        } catch (NoResultException exception) {
+            log.info(exception.getMessage());
+            return null;
+        }
     }
 
     @Override

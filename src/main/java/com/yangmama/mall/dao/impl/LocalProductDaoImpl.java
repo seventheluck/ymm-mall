@@ -2,15 +2,18 @@ package com.yangmama.mall.dao.impl;
 
 import com.yangmama.mall.dao.LocalProductDao;
 import com.yangmama.mall.model.LocalProduct;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import java.util.List;
 
 @Repository
+@Slf4j
 public class LocalProductDaoImpl implements LocalProductDao {
 
     @Autowired
@@ -35,7 +38,12 @@ public class LocalProductDaoImpl implements LocalProductDao {
         Query<LocalProduct> query = currentSession.createQuery("from LocalProduct l where l.shopifyId = :shopifyId and l.variantId = :variantId");
         query.setParameter("shopifyId", shopifyId);
         query.setParameter("variantId", variantId);
-        return query.getSingleResult();
+        try {
+            return query.getSingleResult();
+        } catch (NoResultException exception){
+            log.info(exception.getMessage());
+            return null;
+        }
     }
 
     @Override

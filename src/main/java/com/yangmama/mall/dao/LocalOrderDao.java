@@ -14,7 +14,7 @@ public interface LocalOrderDao {
 
     List<LocalOrder> getByStatus(List<String> status);
 
-    List<LocalOrder> getByDisplayid(String displayId);
+    LocalOrder getByDisplayid(String displayId);
 
     void save(LocalOrder localOrder);
 
