@@ -57,10 +57,10 @@ public class LocalOrderServiceImpl implements LocalOrderService {
     @Override
     public List<LocalOrder> get(String shippingMethod, int pageNumber, int pageSize) {
         if (!Strings.isNullOrEmpty(shippingMethod)) {
-            return localOrderDao.getByShippingMethod(shippingMethod);
+            return localOrderDao.getByShippingMethod(shippingMethod, "open");
         }
 
-        return localOrderDao.get();
+        return localOrderDao.get("open");
     }
 
     @Transactional(rollbackFor = {Exception.class})

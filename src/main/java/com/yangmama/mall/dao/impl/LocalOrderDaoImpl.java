@@ -20,28 +20,42 @@ public class LocalOrderDaoImpl implements LocalOrderDao {
     @Autowired
     private EntityManager entityManager;
 
+    /**
+     * Get all orders
+     * @return list of all orders
+     * @param status
+     */
     @Override
-    public List<LocalOrder> get() {
+    public List<LocalOrder> get(String status) {
         Session currentSession = entityManager.unwrap(Session.class);
         Query<LocalOrder> query = currentSession.createQuery("from LocalOrder l where l.status = :status");
-        query.setParameter("status", "open");
+        query.setParameter("status", status);
         return query.getResultList();
     }
 
-
-
+    /**
+     * Get order by id
+     * @param id
+     * @return order
+     */
     @Override
     public LocalOrder get(Long id) {
         Session currentSession = entityManager.unwrap(Session.class);
         return currentSession.get(LocalOrder.class, id);
     }
 
+    /**
+     * Get orders by shipping method
+     * @param shippingMethod
+     * @param status
+     * @return order list
+     */
     @Override
-    public List<LocalOrder> getByShippingMethod(String shippingMethod) {
+    public List<LocalOrder> getByShippingMethod(String shippingMethod, String status) {
         Session currentSession = entityManager.unwrap(Session.class);
         Query<LocalOrder> query = currentSession.createQuery("from LocalOrder l where l.shippingMethod = :shippingMethod and l.status = :status");
         query.setParameter("shippingMethod", shippingMethod);
-        query.setParameter("status", "open");
+        query.setParameter("status", status);
         return query.getResultList();
     }
 
