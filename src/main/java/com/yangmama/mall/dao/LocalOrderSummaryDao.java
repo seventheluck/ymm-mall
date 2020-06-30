@@ -9,5 +9,4 @@ public interface LocalOrderSummaryDao {
     void delete(Long id);
 
     LocalOrderSummary queryByProductIdAndShippingMethod(Long productId, String shippingMethod);
-
 }

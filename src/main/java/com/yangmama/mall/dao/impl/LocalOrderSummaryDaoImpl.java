@@ -2,14 +2,17 @@ package com.yangmama.mall.dao.impl;
 
 import com.yangmama.mall.dao.LocalOrderSummaryDao;
 import com.yangmama.mall.model.LocalOrderSummary;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 
 @Repository
+@Slf4j
 public class LocalOrderSummaryDaoImpl implements LocalOrderSummaryDao {
 
     @Autowired
@@ -35,6 +38,11 @@ public class LocalOrderSummaryDaoImpl implements LocalOrderSummaryDao {
                 "from LocalOrderSummary  los where los.localProduct.id = :productId and los.shippingMethod =: shippingMethod");
         query.setParameter("productId", productId);
         query.setParameter("shippingMethod", shippingMethod);
-        return query.getSingleResult();
+        try {
+            return query.getSingleResult();
+        } catch (NoResultException exception) {
+            log.info(exception.getMessage());
+            return null;
+        }
     }
 }
