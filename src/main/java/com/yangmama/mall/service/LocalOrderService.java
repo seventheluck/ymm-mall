@@ -12,6 +12,8 @@ public interface LocalOrderService {
 
     LocalOrder get(Long id);
 
+    LocalOrder getByDisplayId(String displayId);
+
     void save(LocalOrder localOrder);
 
     void delete(Long id);

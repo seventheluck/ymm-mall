@@ -69,6 +69,11 @@ public class LocalOrderServiceImpl implements LocalOrderService {
         return localOrderDao.get(id);
     }
 
+    @Override
+    public LocalOrder getByDisplayId(String displayId) {
+        return localOrderDao.getByDisplayid(displayId);
+    }
+
     @Transactional(rollbackFor = {Exception.class})
     @Override
     public void save(LocalOrder localOrder) {
